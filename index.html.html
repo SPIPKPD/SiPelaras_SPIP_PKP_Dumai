@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SI-PELARAS: Integrasi SPIP & SAKIP v1.0</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .modal { transition: opacity 0.25s ease; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <header class="bg-blue-800 text-white shadow-md p-6">
+        <div class="container mx-auto flex flex-col md:flex-row justify-between items-center">
+            <div>
+                <h1 class="text-2xl font-bold tracking-wide">SI-PELARAS</h1>
+                <p class="text-sm text-blue-200">Sistem Pengendalian Berorientasi Laras SAKIP (Integrasi SPIP & Manajemen Risiko)</p>
+            </div>
+            <div class="mt-4 md:mt-0 text-right">
+                <span class="bg-blue-700 px-4 py-2 rounded text-xs font-semibold uppercase tracking-wider block border border-blue-500">
+                    Acuan: Politeknik KP Dumai - Laporan SPIP 2026
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+        
+        <section class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-white p-5 rounded-lg shadow border-l-4 border-blue-600">
+                <p class="text-xs text-gray-500 uppercase font-bold">Total Sasaran (SAKIP)</p>
+                <p class="text-2xl font-semibold mt-1" id="stat-sasaran">0</p>
+            </div>
+            <div class="bg-white p-5 rounded-lg shadow border-l-4 border-green-500">
+                <p class="text-xs text-gray-500 uppercase font-bold">Risiko Aman (Hijau)</p>
+                <p class="text-2xl font-semibold text-green-600 mt-1" id="stat-hijau">0</p>
+            </div>
+            <div class="bg-white p-5 rounded-lg shadow border-l-4 border-yellow-500">
+                <p class="text-xs text-gray-500 uppercase font-bold">Risiko Waspada (Kuning)</p>
+                <p class="text-2xl font-semibold text-yellow-600 mt-1" id="stat-kuning">0</p>
+            </div>
+            <div class="bg-white p-5 rounded-lg shadow border-l-4 border-red-500">
+                <p class="text-xs text-gray-500 uppercase font-bold">Risiko Bahaya (Merah)</p>
+                <p class="text-2xl font-semibold text-red-600 mt-1" id="stat-merah">0</p>
+            </div>
+        </section>
+
+        <section class="bg-white p-6 rounded-lg shadow mb-8">
+            <h2 class="text-lg font-bold text-gray-700 mb-4 border-b pb-2 flex justify-between items-center">
+                <span>Pelaras Kinerja & Pengendalian Risiko Baru</span>
+                <button onclick="loadTemplateDummy()" class="text-xs text-blue-600 hover:underline font-normal">+ Masukkan Data Acuan Dumai 2026</button>
+            </h2>
+            <form id="form-pelaras" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Sasaran / IKU (SAKIP)</label>
+                    <textarea id="inp-iku" required class="w-full border rounded p-2 text-sm bg-gray-50 focus:bg-white" placeholder="Contoh: Meningkatnya kualitas manajemen tata kelola berdasarkan sistem penjamin mutu digital..." rows="2"></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Risiko Utama Mengancam (SPIP)</label>
+                    <textarea id="inp-risiko" required class="w-full border rounded p-2 text-sm bg-gray-50 focus:bg-white" placeholder="Contoh: Aplikasi layanan/sistem penjamin mutu sering eror/down di jam sibuk..." rows="2"></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Langkah Pengendalian (SPIP)</label>
+                    <textarea id="inp-pengendalian" required class="w-full border rounded p-2 text-sm bg-gray-50 focus:bg-white" placeholder="Contoh: Migrasi server ke cloud dan maintenance berkala mingguan..." rows="2"></textarea>
+                </div>
+                <div class="md:col-span-1">
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Probabilitas / Kemungkinan</label>
+                    <select id="inp-prob" class="w-full border rounded p-2 text-sm bg-gray-50">
+                        <option value="1">1 - Jarang Terjadi (0-20%)</option>
+                        <option value="2">2 - Kemungkinan Kecil (20-40%)</option>
+                        <option value="3">3 - Kemungkinan Sedang (40-60%)</option>
+                        <option value="4">4 - Kemungkinan Besar (60-80%)</option>
+                        <option value="5">5 - Hampir Pasti Terjadi (80-100%)</option>
+                    </select>
+                </div>
+                <div class="md:col-span-1">
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Dampak Terhadap Kinerja</label>
+                    <select id="inp-dampak" class="w-full border rounded p-2 text-sm bg-gray-50">
+                        <option value="1">1 - Tidak Signifikan (Dapat diatasi rutin)</option>
+                        <option value="2">2 - Kecil (Mengganggu sedikit tujuan)</option>
+                        <option value="3">3 - Sedang (Mengganggu signifikan tujuan)</option>
+                        <option value="4">4 - Besar (Tujuan hanya tercapai sebagian)</option>
+                        <option value="5">5 - Sangat Tinggi / Katastropik (Gagal dicapai)</option>
+                    </select>
+                </div>
+                <div class="md:col-span-1 flex items-end">
+                    <button type="submit" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded text-sm transition shadow">
+                        Simpan & Petakan Status
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <section class="bg-white rounded-lg shadow overflow-hidden">
+            <div class="p-5 border-b bg-gray-100">
+                <h3 class="font-bold text-gray-700">Matriks Keselarasan Kinerja (SAKIP) & Risiko Intern (SPIP)</h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-200 text-gray-700 text-xs uppercase font-bold border-b">
+                            <th class="p-3 w-12 text-center">No</th>
+                            <th class="p-3 w-1/4">Indikator Kinerja / IKU (SAKIP)</th>
+                            <th class="p-3 w-1/4">Risiko yang Mengancam (SPIP)</th>
+                            <th class="p-3 w-1/4">Langkah Pengendalian Tindak Lanjut</th>
+                            <th class="p-3 text-center">Skor Risiko</th>
+                            <th class="p-3 text-center">Status Lampu</th>
+                            <th class="p-3 text-center">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body" class="text-sm divide-y">
+                        </tbody>
+                </table>
+            </div>
+            <div id="empty-state" class="p-8 text-center text-gray-400 hidden">
+                Belum ada data keselarasan. Klik tombol "+ Masukkan Data Acuan Dumai 2026" di atas untuk mengisi data simulasi otomatis.
+            </div>
+        </section>
+    </main>
+
+    <footer class="mt-12 bg-gray-800 text-gray-400 p-4 text-center text-xs">
+        <p>© 2026 Inovasi SPIP Terintegrasi SAKIP Simple Web - Dikembangkan Mengacu Pada Kerangka Pelaporan Triwulan I KKP.</p>
+    </footer>
+
+    <script>
+        // Inisialisasi basis data dari LocalStorage agar data permanen di browser lokal pengguna
+        let dbPelaras = JSON.parse(localStorage.getItem('dbPelaras')) || [];
+
+        const form = document.getElementById('form-pelaras');
+        const tableBody = document.getElementById('table-body');
+        const emptyState = document.getElementById('empty-state');
+
+        // Fungsi menghitung status berdasarkan matriks risiko sederhana (Perkalian Probabilitas x Dampak)
+        function hitungStatus(prob, dampak) {
+            const skor = prob * dampak;
+            // Aturan penentuan lampu lalu lintas (Traffic Light System)
+            if (skor <= 6) return { teks: 'HIJAU (Aman)', bg: 'bg-green-100 text-green-800 border-green-300', code: 'hijau', skor };
+            if (skor <= 12) return { teks: 'KUNING (Waspada)', bg: 'bg-yellow-100 text-yellow-800 border-yellow-300', code: 'kuning', skor };
+            return { teks: 'MERAH (Bahaya)', bg: 'bg-red-100 text-red-800 border-red-300', code: 'merah', skor };
+        }
+
+        // Render data ke tabel dan perbarui widget statistik
+        function renderData() {
+            tableBody.innerHTML = '';
+            
+            if (dbPelaras.length === 0) {
+                emptyState.classList.remove('hidden');
+                updateStats(0, 0, 0, 0);
+                return;
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            let h = 0, k = 0, m = 0;
+
+            dbPelaras.forEach((item, index) => {
+                const status = hitungStatus(item.prob, item.dampak);
+                
+                if (status.code === 'hijau') h++;
+                if (status.code === 'kuning') k++;
+                if (status.code === 'merah') m++;
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-gray-50 transition";
+                tr.innerHTML = `
+                    <td class="p-3 text-center font-semibold text-gray-500">${index + 1}</td>
+                    <td class="p-3 font-medium text-gray-800">${escapeHtml(item.iku)}</td>
+                    <td class="p-3 text-gray-600">${escapeHtml(item.risiko)}</td>
+                    <td class="p-3 text-gray-600"><span class="bg-blue-50 text-blue-900 text-xs px-2 py-1 rounded block border border-blue-100 mb-1 font-semibold">Aksi Pengendalian:</span>${escapeHtml(item.pengendalian)}</td>
+                    <td class="p-3 text-center font-bold text-gray-700">${status.skor} <br><span class="text-xs font-normal text-gray-400">(${item.prob}x${item.dampak})</span></td>
+                    <td class="p-3 text-center">
+                        <span class="px-2.5 py-1 rounded-full text-xs font-bold border ${status.bg}">
+                            ${status.teks}
+                        </span>
+                    </td>
+                    <td class="p-3 text-center">
+                        <button onclick="hapusData(${index})" class="text-red-500 hover:text-red-700 text-xs font-bold bg-red-50 hover:bg-red-100 px-2 py-1 rounded border border-red-200 transition">
+                            Hapus
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(tr);
+            });
+
+            updateStats(dbPelaras.length, h, k, m);
+        }
+
+        function updateStats(total, h, k, m) {
+            document.getElementById('stat-sasaran').innerText = total;
+            document.getElementById('stat-hijau').innerText = h;
+            document.getElementById('stat-kuning').innerText = k;
+            document.getElementById('stat-merah').innerText = m;
+        }
+
+        // Simpan data dari input form
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const newItem = {
+                iku: document.getElementById('inp-iku').value,
+                risiko: document.getElementById('inp-risiko').value,
+                pengendalian: document.getElementById('inp-pengendalian').value,
+                prob: parseInt(document.getElementById('inp-prob').value),
+                dampak: parseInt(document.getElementById('inp-dampak').value)
+            };
+            dbPelaras.push(newItem);
+            localStorage.setItem('dbPelaras', JSON.stringify(dbPelaras));
+            form.reset();
+            renderData();
+        });
+
+        // Hapus entri data
+        function hapusData(index) {
+            if(confirm("Apakah Anda yakin ingin menghapus data keselarasan SPIP-SAKIP ini?")) {
+                dbPelaras.splice(index, 1);
+                localStorage.setItem('dbPelaras', JSON.stringify(dbPelaras));
+                renderData();
+            }
+        }
+
+        // Memuat data dummy otomatis yang dilaraskan langsung dari Dokumen Pokok Laporan SPIP Politeknik KP Dumai 2026
+        function loadTemplateDummy() {
+            const dummy = [
+                {
+                    iku: "Mewujudkan manajemen dan tata kelola berdasarkan sistem penjamin mutu berbasis digital dan teknologi informasi (Sasaran Misi SAKIP Ke-5)",
+                    risiko: "Tujuan organisasi belum ditetapkan secara spesifik serta aplikasi penjaminan mutu digital internal sering terganggu / down pada jam pengisian evaluasi",
+                    pengendalian: "Penyusunan SOP tata kelola IT berbasis risiko serta migrasi server database utama ke arsitektur Cloud kementerian",
+                    prob: 3,
+                    dampak: 3
+                },
+                {
+                    iku: "Realisasi penggunaan dan penyerapan Pagu Anggaran Triwulan I tepat sasaran sebesar 95% (Akuntabilitas Keuangan)",
+                    risiko: "Kurangnya keterpaduan, konsistensi, dan sinkronisasi antara perencanaan kinerja fisik dengan kecepatan penyusunan SPJ keuangan oleh pelaksana",
+                    pengendalian: "Penyelenggaraan evaluasi berkala dwi-mingguan tim keuangan dan pembatasan maksimal penyerahan SPJ H+3 setelah kegiatan selesai",
+                    prob: 4,
+                    dampak: 2
+                },
+                {
+                    iku: "Menghasilkan SDM kelautan dan perikanan yang kompeten, profesional, dan berdaya saing tinggi (Sasaran Pendidikan Vokasi)",
+                    risiko: "SOP pengajaran berbasis Teaching Factory (TEFA) belum sepenuhnya ditaati atau dijalankan secara optimal oleh civitas akademika",
+                    pengendalian: "Melaksanakan audit kepatuhan internal rutin oleh Satuan Pengawas Internal (SPI) terhadap pelaksanaan modul TEFA di lapangan",
+                    prob: 2,
+                    dampak: 4
+                }
+            ];
+            dbPelaras = dummy;
+            localStorage.setItem('dbPelaras', JSON.stringify(dbPelaras));
+            renderData();
+        }
+
+        // Pengaman input teks HTML mencegah celah keamanan XSS
+        function escapeHtml(text) {
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // Render awal saat web dimuat
+        renderData();
+    </script>
+</body>
+</html>
