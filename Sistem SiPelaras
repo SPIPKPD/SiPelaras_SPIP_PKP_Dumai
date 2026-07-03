@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SI-PELARAS: Integrasi SPIP & SAKIP v1.0</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800 flex flex-col min-h-screen">
+
+    <header class="bg-blue-800 text-white shadow-md p-6">
+        <div class="container mx-auto flex flex-col md:flex-row justify-between items-center">
+            <div>
+                <h1 class="text-2xl font-bold tracking-wide">SI-PELARAS</h1>
+                <p class="text-sm text-blue-200">Sistem Pengendalian Berorientasi Laras SAKIP (Integrasi SPIP & Manajemen Risiko)</p>
+            </div>
+            <div class="mt-4 md:mt-0 text-right">
+                <span class="bg-blue-700 px-4 py-2 rounded text-xs font-semibold uppercase tracking-wider block border border-blue-500">
+                    Politeknik KP Dumai - Acuan SPIP 2026
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8 flex-grow">
+        
+        <section class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-white p-5 rounded-lg shadow border-l-4 border-blue-600">
+                <p class="text-xs text-gray-500 uppercase font-bold">Total Sasaran (SAKIP)</p>
+                <p class="text-2xl font-semibold mt-1" id="stat-sasaran">0</p>
+            </div>
+            <div class="bg-white p-5 rounded-lg shadow border-l-4 border-green-500">
+                <p class="text-xs text-gray-500 uppercase font-bold">Risiko Aman (Hijau)</p>
+                <p class="text-2xl font-semibold text-green-600 mt-1" id="stat-hijau">0</p>
+            </div>
+            <div class="bg-white p-5 rounded-lg shadow border-l-4 border-yellow-500">
+                <p class="text-xs text-gray-500 uppercase font-bold">Risiko Waspada (Kuning)</p>
+                <p class="text-2xl font-semibold text-yellow-600 mt-1" id="stat-kuning">0</p>
+            </div>
+            <div class="bg-white p-5 rounded-lg shadow border-l-4 border-red-500">
+                <p class="text-xs text-gray-500 uppercase font-bold">Risiko Bahaya (Merah)</p>
+                <p class="text-2xl font-semibold text-red-600 mt-1" id="stat-merah">0</p>
+            </div>
+        </section>
+
+        <section class="bg-white p-6 rounded-lg shadow mb-8">
+            <h2 class="text-lg font-bold text-gray-700 mb-4 border-b pb-2 flex justify-between items-center">
+                <span>Pelaras Kinerja & Pengendalian Risiko Baru</span>
+                <button onclick="loadTemplateDummy()" class="text-xs text-blue-600 hover:underline font-semibold">+ Masukkan Data Acuan Dumai 2026</button>
+            </h2>
+            <form id="form-pelaras" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Sasaran / IKU (SAKIP)</label>
+                    <textarea id="inp-iku" required class="w-full border rounded p-2 text-sm bg-gray-50 focus:bg-white" placeholder="Masukkan target capaian kinerja SAKIP..." rows="2"></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Risiko Utama Mengancam (SPIP)</label>
+                    <textarea id="inp-risiko" required class="w-full border rounded p-2 text-sm bg-gray-50 focus:bg-white" placeholder="Faktor intern/ekstern penolak target..." rows="2"></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Langkah Pengendalian Tindak Lanjut</label>
+                    <textarea id="inp-pengendalian" required class="w-full border rounded p-2 text-sm bg-gray-50 focus:bg-white" placeholder="Rencana mitigasi konkret..." rows="2"></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Probabilitas / Kemungkinan</label>
+                    <select id="inp-prob" class="w-full border rounded p-2 text-sm bg-gray-50">
+                        <option value="1">1 - Jarang Terjadi (0-20%)</option>
+                        <option value="2">2 - Kemungkinan Kecil (20-40%)</option>
+                        <option value="3">3 - Kemungkinan Sedang (40-60%)</option>
+                        <option value="4">4 - Kemungkinan Besar (60-80%)</option>
+                        <option value="5">5 - Hampir Pasti (80-100%)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Dampak Kinerja</label>
+                    <select id="inp-dampak" class="w-full border rounded p-2 text-sm bg-gray-50">
+                        <option value="1">1 - Tidak Signifikan</option>
+                        <option value="2">2 - Kecil / Minor</option>
+                        <option value="3">3 - Sedang / Moderat</option>
+                        <option value="4">4 - Besar / Signifikan</option>
+                        <option value="5">5 - Sangat Tinggi / Katastropik</option>
+                    </select>
+                </div>
+                <div class="flex items-end">
+                    <button type="submit" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded text-sm transition shadow">
+                        Simpan & Petakan Status
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <section class="bg-white rounded-lg shadow overflow-hidden">
+            <div class="p-5 border-b bg-gray-100">
+                <h3 class="font-bold text-gray-700">Matriks Penyelarasan Kinerja & Risiko Triwulan</h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-200 text-gray-700 text-xs uppercase font-bold border-b">
+                            <th class="p-3 w-12 text-center">No</th>
+                            <th class="p-3 w-1/4">Indikator Kinerja / IKU (SAKIP)</th>
+                            <th class="p-3 w-1/4">Risiko yang Mengancam (SPIP)</th>
+                            <th class="p-3 w-1/4">Langkah Pengendalian</th>
+                            <th class="p-3 text-center">Skor</th>
+                            <th class="p-3 text-center">Status Lampu</th>
+                            <th class="p-3 text-center">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body" class="text-sm divide-y"></tbody>
+                </table>
+            </div>
+            <div id="empty-state" class="p-8 text-center text-gray-400 hidden">Belum ada data keselarasan.</div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 text-gray-400 p-4 text-center text-xs mt-auto">
+        <p>© 2026 Inovasi SI-PELARAS - Politeknik Kelautan dan Perikanan Dumai.</p>
+    </footer>
+
+    <script>
+        let dbPelaras = JSON.parse(localStorage.getItem('dbPelaras')) || [];
+        const form = document.getElementById('form-pelaras');
+        const tableBody = document.getElementById('table-body');
+        const emptyState = document.getElementById('empty-state');
+
+        function hitungStatus(prob, dampak) {
+            const skor = prob * dampak;
+            if (skor <= 6) return { teks: 'HIJAU (Aman)', bg: 'bg-green-100 text-green-800 border-green-300', code: 'hijau', skor };
+            if (skor <= 12) return { teks: 'KUNING (Waspada)', bg: 'bg-yellow-100 text-yellow-800 border-yellow-300', code: 'kuning', skor };
+            return { teks: 'MERAH (Bahaya)', bg: 'bg-red-100 text-red-800 border-red-300', code: 'merah', skor };
+        }
+
+        function renderData() {
+            tableBody.innerHTML = '';
+            if (dbPelaras.length === 0) {
+                emptyState.classList.remove('hidden');
+                updateStats(0, 0, 0, 0);
+                return;
+            }
+            emptyState.classList.add('hidden');
+            let h = 0, k = 0, m = 0;
+            dbPelaras.forEach((item, index) => {
+                const status = hitungStatus(item.prob, item.dampak);
+                if (status.code === 'hijau') h++;
+                if (status.code === 'kuning') k++;
+                if (status.code === 'merah') m++;
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-gray-50";
+                tr.innerHTML = `
+                    <td class="p-3 text-center font-bold text-gray-500">${index + 1}</td>
+                    <td class="p-3 font-medium">${escapeHtml(item.iku)}</td>
+                    <td class="p-3 text-gray-600">${escapeHtml(item.risiko)}</td>
+                    <td class="p-3 text-gray-600">${escapeHtml(item.pengendalian)}</td>
+                    <td class="p-3 text-center font-bold">${status.skor} <br><span class="text-xs font-normal text-gray-400">(${item.prob}x${item.dampak})</span></td>
+                    <td class="p-3 text-center"><span class="px-2.5 py-1 rounded-full text-xs font-bold border ${status.bg}">${status.teks}</span></td>
+                    <td class="p-3 text-center"><button onclick="hapusData(${index})" class="text-red-500 hover:bg-red-50 px-2 py-1 border border-red-200 rounded text-xs font-bold">Hapus</button></td>
+                `;
+                tableBody.appendChild(tr);
+            });
+            updateStats(dbPelaras.length, h, k, m);
+        }
+
+        function updateStats(total, h, k, m) {
+            document.getElementById('stat-sasaran').innerText = total;
+            document.getElementById('stat-hijau').innerText = h;
+            document.getElementById('stat-kuning').innerText = k;
+            document.getElementById('stat-merah').innerText = m;
+        }
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            dbPelaras.push({
+                iku: document.getElementById('inp-iku').value,
+                risiko: document.getElementById('inp-risiko').value,
+                pengendalian: document.getElementById('inp-pengendalian').value,
+                prob: parseInt(document.getElementById('inp-prob').value),
+                dampak: parseInt(document.getElementById('inp-dampak').value)
+            });
+            localStorage.setItem('dbPelaras', JSON.stringify(dbPelaras));
+            form.reset();
+            renderData();
+        });
+
+        function hapusData(index) {
+            if(confirm("Hapus data ini?")) {
+                dbPelaras.splice(index, 1);
+                localStorage.setItem('dbPelaras', JSON.stringify(dbPelaras));
+                renderData();
+            }
+        }
+
+        function loadTemplateDummy() {
+            dbPelaras = [
+                { iku: "Mewujudkan manajemen tata kelola berbasis sistem digital penjaminan mutu tata kelola (SAKIP)", risiko: "Aplikasi penjaminan mutu internal sering mengalami gangguan teknis/down pada saat pengisian berkas kriteria evaluasi (SPIP)", pengendalian: "Migrasi arsitektur basis data utama ke Cloud terpusat milik kementerian serta penetapan SOP mitigasi tanggap darurat IT", prob: 3, dampak: 3 },
+                { iku: "Realisasi penyerapan Pagu Anggaran triwulan secara tepat sasaran mencapai target minimal 95%", risiko: "Kurangnya keterpaduan sinkronisasi berakibat pada keterlambatan penyusunan SPJ keuangan oleh pelaksana kegiatan internal", pengendalian: "Penerapan aturan batas penyerahan berkas SPJ mutlak maksimal H+3 pasca pelaksanaan kegiatan lapangan selesai", prob: 4, dampak: 2 }
+            ];
+            localStorage.setItem('dbPelaras', JSON.stringify(dbPelaras));
+            renderData();
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+        renderData();
+    </script>
+</body>
+</html>
